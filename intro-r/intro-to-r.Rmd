@@ -26,6 +26,18 @@ opts_knit$set(width = 75)
 
 The data we'll use comes from the article entitled “The Influence of Recombination on Human Genetic Diversity” [see below: @10.1371/journal.pgen.0020148]. The data is contained in `Dataset_S1.txt` and found on [GitHub](https://github.com/vsbuffalo/bds-files) as part of example code for the O'Reilly book **[Bioinformatics Data Skills](http://proquest.safaribooksonline.com/book/bioinformatics/9781449367480)**. The following tutorial is adapted from that book and [Data Carpentry Lessons](http://www.datacarpentry.org/lessons/).  
 
+`Dataset_S1.txt` contains:
+
+* estimates of population genetics statistics such as nucleotide diversity (e.g., the columns Pi and Theta), 
+* recombination (column Recombination), 
+* and sequence divergence as estimated by percent identity between human and chimpanzee genomes (column Divergence). 
+
+Other columns contain: 
+
+* information about the sequencing depth (depth), 
+* and GC content (percent.GC). 
+
+In this lesson, we’ll only work with a few columns in our examples; see the description of Dataset_S1.txt in this paper’s supplementary information for more detail. Dataset_S1.txt includes these estimates for 1kb windows in human chromosome 20.
 ## Loading Data into R 
 
 Before we download the data we need to find out our working directory and set it to the appropriate folder. 
@@ -59,7 +71,7 @@ Before we attempt to load the `Dataset_S1.txt` data set, we want to inspect a pa
 head -n 10 data/Dataset_S1.txt
 ```
 
-This prints out the first 10 lines of the file. Alternately, we can attempt to open the file in a text editor (not word or other markup rich word processors, but somethign like notepad, sublime, textmate). From above output we can see the file is comma separated value file with header values. We might want to use tail to see if the end of the file is as tidy as the head. 
+This prints out the first 10 lines of the file. Alternately, we can attempt to open the file in a text editor (not word or other markup rich word processors, but something like notepad, sublime, textmate). From above output we can see the file is comma separated value file with header values. We might want to use tail to see if the end of the file is as tidy as the head. 
 
 ```{r engine='bash'}
 tail -n 10 data/Dataset_S1.txt
@@ -67,15 +79,15 @@ tail -n 10 data/Dataset_S1.txt
 
 Looks good and tidy. We can now read the data into R. 
 
-**Note**: If your data is untidy (not ready for analysis because of various reasons), you will need to reshape or clean your. Read Hadley Wickham's article Tidy Data [-@JSSv059i10] for more information on how to do this in R. 
+**Note**: If your data is untidy (not ready for analysis because of various reasons), you will need to reshape or clean your. Read Hadley Wickham's article Tidy Data http://vita.had.co.nz/papers/tidy-data.pdf for more information on how to do this in R. 
 
-**Note:** If your data is too big to read, try a few of the below stratedgies. 
+**Note:** If your data is too big to read, try a few of the below strategies. 
 
 1. Chunking up your data (working with a chromosome at a time).
 2. Try working with random subset instead of the whole dataset 
 3. There are a few tricks in R to make read.csv or read.delim functions load large data files faster:
     + Look at colClasses argument and set the datatype 
-    + R can skip columns by setting their vals in colClasses to "NULL" in quotes
+    + R can skip columns by setting their values in colClasses to "NULL" in quotes
     + Try setting nrow in read.delim() to the length of your dataset can help
 
 If these don't work try the packages `readr` or `data.table`, both improving read speed.
@@ -85,7 +97,7 @@ Finally, if data still too big, you'll want to keep the bulk of data out of memo
 d <- read.csv("data/Dataset_S1.txt")
 ```
 
-In R, we can do this using the `head()` built in function. If you are famililar with `UNIX`, the `head()` function immulates the functionality that `head` provide on the command line, but against R objects.  There is also a `tail` in R for inspecting the end lines of files. Let's use `head()` and `tail()` to look in the file
+In R, we can do this using the `head()` built in function. If you are familiar with `UNIX`, the `head()` function emulates the functionality that `head` provide on the command line, but against R objects.  There is also a `tail` in R for inspecting the end lines of files. Let's use `head()` and `tail()` to look in the file
 
 ```{r}
 head(d)
@@ -108,7 +120,7 @@ head(d)
 ```{r}
 str(d)
 ```
-## Inspectcing data frames 
+## Inspecting data frames 
 
 `head()` and `str()` are helpful to to check contents of a data frame, but there are more functions that aid in telling what's in a data frame. 
 
@@ -120,19 +132,19 @@ str(d)
 
 ## Challenge 
 
-Based on the give table of functions to asses data structure, can you answer the following questions?
+Based on the above functions, can you answer the following questions?
 
-1. What is the class of the object metadata?
+1. What is the class of the object `d`?
 2. How many rows and how many columns are in this object?
 3. Mean of the column `depth`?
 
 ## Exploring and Transforming Dataframes
 
-We have Dataset_S1.txt as dataframe `d` with columns (variables) and rows. Let's step through finding out more about the dimensions, rows, columns, and row and column names of a dataframe. 
+We have `Dataset_S1.txt` as dataframe `d` with columns (variables) and rows. Let's step through finding out more about the dimensions, rows, columns, and row and column names of the dataframe. 
 
-* Each column of dataframe is a vector and has a type. 
-* But dataframe can contain many columns of all different types, heterogeneous types of vectors.
-* Let's look at the dataframe
+* Each column of a dataframe is a vector and has a type. 
+    + Dataframes can contain many columns of all different types, heterogeneous types of vectors.
+* Let's look at the dataframe `d`
 
 ```{r}
 head(d, n=3)
@@ -151,8 +163,8 @@ dim(d)
 colnames(d)
 ```
 
-* R's read.csv renamed some cols for us - spaces become periods, the %GC has been changed to X.
-* Let's change `X.GC` to somethign better
+* R's `read.csv()` renamed some cols for us - spaces become periods, the %GC has been changed to X.
+* Let's change `X.GC` to something better
 
 ```{r}
 colnames(d)[12]
@@ -161,7 +173,6 @@ colnames(d)[12]
 ```
 
 * We also could set row names using `row.names() <-  (row names must be unique).
-
 * We can access a single column using the `$` operator.
 
 ```{r}
@@ -176,26 +187,29 @@ mean(d$depth)
 summary(d$depth)
 ```
 * `$` is a shortcut operator for the more general bracket operator used to access rows, columns, and cells. 
-* Remember when accessing elements of a vector we used vec[2]
+* Remember when accessing elements of a vector we used vec[2] - maybe create one 
 * Since dataframes are 2-dimensional we used two indexes separated by comma
 * df[row,col]
 
-* We can return all rows and just columns we can omit the row index. 
+* We can return all rows of specified columns by omitting the row index. 
 
 ```{r}
 d[ , 1:2]
 ```
+
 * We can also use column names 
+
 ```{r}
 d[, c("start", "end")]
 ```
+
 * If we want just first row of `start` and `end` positions we'd: 
 
 ```{r}
 d[1,c('start', 'end')]
 ```
 
-* when accessing a single column from a dataframe, R returns a vector. 
+* When accessing a single column from a dataframe, R returns a vector. 
 * Turn this behavior off by setting `drop` variable to FALSE
 
 ```{r}
@@ -209,6 +223,7 @@ d$cent <- d$start >= 25800000 & d$end <= 29700000
 * Single ampersand (&), which is the vectorized version of logical AND 
 * `&` operates on each element of the two vectors created by dd$start >= 25800000 and dd$end <= 29700000 and returns TRUE when both are >true. 
 * To tally we could use table():
+
 ```{r}
 table(d$cent)
 ```
@@ -218,7 +233,10 @@ table(d$cent)
 ```{r}
 sum(d$cent)
 ```
-Lastly, note that according to the supplementary material of this paper, the diversity estimates (columns Theta, Pi, and Heterozygosity) are all scaled up by 10x in the dataset (see supplementary Text S1 for more details). We’ll use the nucleotide diversity column Pi later in this chapter in plots, and it would be useful to have this scaled as per basepair nucleotide diversity (so as to make the scale more intuitive). We can create a new rescaled column called diversity with:
+
+* Lastly, note that according to the supplementary material of this paper, the diversity estimates (columns Theta, Pi, and Heterozygosity) are all scaled up by 10x in the dataset (see supplementary Text S1 for more details). 
+* We’ll use the nucleotide diversity column Pi later in plots, and it would be useful to have this scaled as per basepair nucleotide diversity (so as to make the scale more intuitive). 
+* We can create a new rescaled column called diversity with:
 
 ```{r}
 d$diversity <- d$Pi / (10*1000)  # rescale, removing 10x and making per bp
@@ -270,7 +288,7 @@ d[d$Pi > 16 & d$percent.GC > 80, c("start", "end", "depth", "Pi")]
 d[d$Pi > 16 & d$percent.GC > 80, c("start", "end", "Pi", "depth")]
 ```
 * Subsetting columns can be good way to summarize data.
-* Average depth in a window (depth col) differes between very high GC content windows (greater than 80%) and all other windows: 
+* Average depth in a window (depth col) differed between very high GC content windows (greater than 80%) and all other windows: 
 
 ```{r}
 summary(d$depth[d$percent.GC >= 80])
@@ -299,6 +317,7 @@ d$Pi > 3
 ```{r}
 which(d$Pi > 3)
 ```
+
 which() also has two related functions that return the index of the first minimum or maximum element of a vector: which.min() and which.max(). For example:
 
 ```{r}
@@ -333,6 +352,7 @@ subset(d, Pi > 16 & percent.GC > 80, c(start, end, Pi, percent.GC, depth))
 library(ggplot2)
 
 ```
+
 ggplot2 to create a scatterplot of nucleotide diversity along the chromosome in the diversity column in our d dataframe. Because our data is window-based, we’ll first add a column called position to our dataframe that’s the midpoint between each window:
 
 ```{r}

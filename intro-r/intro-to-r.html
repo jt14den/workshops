@@ -99,9 +99,18 @@ img {
 <div id="working-with-data" class="section level2">
 <h2>Working with Data</h2>
 <p>The data we’ll use comes from the article entitled “The Influence of Recombination on Human Genetic Diversity” <span class="citation">(see below: Spencer 2006)</span>. The data is contained in <code>Dataset_S1.txt</code> and found on <a href="https://github.com/vsbuffalo/bds-files">GitHub</a> as part of example code for the O’Reilly book <strong><a href="http://proquest.safaribooksonline.com/book/bioinformatics/9781449367480">Bioinformatics Data Skills</a></strong>. The following tutorial is adapted from that book and <a href="http://www.datacarpentry.org/lessons/">Data Carpentry Lessons</a>.</p>
-</div>
-<div id="loading-data-into-r" class="section level2">
-<h2>Loading Data into R</h2>
+<p><code>Dataset_S1.txt</code> contains:</p>
+<ul>
+<li>estimates of population genetics statistics such as nucleotide diversity (e.g., the columns Pi and Theta),</li>
+<li>recombination (column Recombination),</li>
+<li>and sequence divergence as estimated by percent identity between human and chimpanzee genomes (column Divergence).</li>
+</ul>
+<p>Other columns contain:</p>
+<ul>
+<li>information about the sequencing depth (depth),</li>
+<li>and GC content (percent.GC).</li>
+</ul>
+<p>In this lesson, we’ll only work with a few columns in our examples; see the description of Dataset_S1.txt in this paper’s supplementary information for more detail. Dataset_S1.txt includes these estimates for 1kb windows in human chromosome 20. ## Loading Data into R</p>
 <p>Before we download the data we need to find out our working directory and set it to the appropriate folder.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">getwd</span>()  <span class="co"># tells us our current working directory</span></code></pre></div>
 <pre><code>&gt; # [1] &quot;/Users/jtdennis/Desktop/workshops/intro-r&quot;</code></pre>
@@ -129,7 +138,7 @@ img {
 &gt; # 61001,62000,7,6950,6.95,2,1,1000,8.603,8.062,10.431,36.5365,0.009601574,0.01201201,0,0
 &gt; # 62001,63000,1,8834,8.83,1,0,1000,4.01,2.065,1.132,35.5355,0.009601574,0.01501502,0,0
 &gt; # 63001,64000,1,9629,9.63,1,0,1000,3.369,1.879,1.039,43.5435,0.009601574,0.009009009,58,1</code></pre>
-<p>This prints out the first 10 lines of the file. Alternately, we can attempt to open the file in a text editor (not word or other markup rich word processors, but somethign like notepad, sublime, textmate). From above output we can see the file is comma separated value file with header values. We might want to use tail to see if the end of the file is as tidy as the head.</p>
+<p>This prints out the first 10 lines of the file. Alternately, we can attempt to open the file in a text editor (not word or other markup rich word processors, but something like notepad, sublime, textmate). From above output we can see the file is comma separated value file with header values. We might want to use tail to see if the end of the file is as tidy as the head.</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">tail</span> -n 10 data/Dataset_S1.txt</code></pre></div>
 <pre><code>&gt; # 63682001,63683000,4,7501,7.5,2,1,1000,8.849,8.478,5.332,48.8488,0.000650676,0.01453488,0,0
 &gt; # 63683001,63684000,3,7982,7.98,3,0,1000,12.698,6.833,3.759,43.7437,0.000650676,0.01453488,0,0
@@ -142,21 +151,21 @@ img {
 &gt; # 63690001,63691000,5,9885,9.89,1,1,1000,3.685,5.901,5.058,34.2342,0.000650676,0.01453488,0,0
 &gt; # 63691001,63692000,1,3309,6.29,1,0,526,3.022,3.022,3.022,35.6732,0.000650676,0.01453488,0,0</code></pre>
 <p>Looks good and tidy. We can now read the data into R.</p>
-<p><strong>Note</strong>: If your data is untidy (not ready for analysis because of various reasons), you will need to reshape or clean your. Read Hadley Wickham’s article Tidy Data <span class="citation">(<span class="citeproc-not-found" data-reference-id="JSSv059i10"><strong>???</strong></span>)</span> for more information on how to do this in R.</p>
-<p><strong>Note:</strong> If your data is too big to read, try a few of the below stratedgies.</p>
+<p><strong>Note</strong>: If your data is untidy (not ready for analysis because of various reasons), you will need to reshape or clean your. Read Hadley Wickham’s article Tidy Data <a href="http://vita.had.co.nz/papers/tidy-data.pdf" class="uri">http://vita.had.co.nz/papers/tidy-data.pdf</a> for more information on how to do this in R.</p>
+<p><strong>Note:</strong> If your data is too big to read, try a few of the below strategies.</p>
 <ol style="list-style-type: decimal">
 <li>Chunking up your data (working with a chromosome at a time).</li>
 <li>Try working with random subset instead of the whole dataset</li>
 <li>There are a few tricks in R to make read.csv or read.delim functions load large data files faster:
 <ul>
 <li>Look at colClasses argument and set the datatype</li>
-<li>R can skip columns by setting their vals in colClasses to “NULL” in quotes</li>
+<li>R can skip columns by setting their values in colClasses to “NULL” in quotes</li>
 <li>Try setting nrow in read.delim() to the length of your dataset can help</li>
 </ul></li>
 </ol>
 <p>If these don’t work try the packages <code>readr</code> or <code>data.table</code>, both improving read speed. Finally, if data still too big, you’ll want to keep the bulk of data out of memory use a database like <code>SQLite</code> (<code>RSQLite</code> package).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/Dataset_S1.txt&quot;</span>)</code></pre></div>
-<p>In R, we can do this using the <code>head()</code> built in function. If you are famililar with <code>UNIX</code>, the <code>head()</code> function immulates the functionality that <code>head</code> provide on the command line, but against R objects. There is also a <code>tail</code> in R for inspecting the end lines of files. Let’s use <code>head()</code> and <code>tail()</code> to look in the file</p>
+<p>In R, we can do this using the <code>head()</code> built in function. If you are familiar with <code>UNIX</code>, the <code>head()</code> function emulates the functionality that <code>head</code> provide on the command line, but against R objects. There is also a <code>tail</code> in R for inspecting the end lines of files. Let’s use <code>head()</code> and <code>tail()</code> to look in the file</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(d)</code></pre></div>
 <pre><code>&gt; #   start   end total.SNPs total.Bases depth unique.SNPs dhSNPs
 &gt; # 1 55001 56000          0        1894  3.41           0      0
@@ -212,8 +221,8 @@ img {
 &gt; #  $ Constraint     : int  0 0 0 0 0 0 0 0 58 0 ...
 &gt; #  $ SNPs           : int  0 0 0 0 0 0 0 0 1 1 ...</code></pre>
 </div>
-<div id="inspectcing-data-frames" class="section level2">
-<h2>Inspectcing data frames</h2>
+<div id="inspecting-data-frames" class="section level2">
+<h2>Inspecting data frames</h2>
 <p><code>head()</code> and <code>str()</code> are helpful to to check contents of a data frame, but there are more functions that aid in telling what’s in a data frame.</p>
 <ul>
 <li>Size: <code>dim()</code>, <code>nrow</code>, <code>ncol()</code></li>
@@ -225,20 +234,22 @@ img {
 </div>
 <div id="challenge" class="section level2">
 <h2>Challenge</h2>
-<p>Based on the give table of functions to asses data structure, can you answer the following questions?</p>
+<p>Based on the above functions, can you answer the following questions?</p>
 <ol style="list-style-type: decimal">
-<li>What is the class of the object metadata?</li>
+<li>What is the class of the object <code>d</code>?</li>
 <li>How many rows and how many columns are in this object?</li>
 <li>Mean of the column <code>depth</code>?</li>
 </ol>
 </div>
 <div id="exploring-and-transforming-dataframes" class="section level2">
 <h2>Exploring and Transforming Dataframes</h2>
-<p>We have Dataset_S1.txt as dataframe <code>d</code> with columns (variables) and rows. Let’s step through finding out more about the dimensions, rows, columns, and row and column names of a dataframe.</p>
+<p>We have <code>Dataset_S1.txt</code> as dataframe <code>d</code> with columns (variables) and rows. Let’s step through finding out more about the dimensions, rows, columns, and row and column names of the dataframe.</p>
 <ul>
-<li>Each column of dataframe is a vector and has a type.</li>
-<li>But dataframe can contain many columns of all different types, heterogeneous types of vectors.</li>
-<li>Let’s look at the dataframe</li>
+<li>Each column of a dataframe is a vector and has a type.
+<ul>
+<li>Dataframes can contain many columns of all different types, heterogeneous types of vectors.</li>
+</ul></li>
+<li>Let’s look at the dataframe <code>d</code></li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(d, <span class="dt">n =</span> <span class="dv">3</span>)</code></pre></div>
 <pre><code>&gt; #   start   end total.SNPs total.Bases depth unique.SNPs dhSNPs
@@ -273,8 +284,8 @@ img {
 &gt; # [13] &quot;Recombination&quot;   &quot;Divergence&quot;      &quot;Constraint&quot;     
 &gt; # [16] &quot;SNPs&quot;</code></pre>
 <ul>
-<li>R’s read.csv renamed some cols for us - spaces become periods, the %GC has been changed to X.</li>
-<li>Let’s change <code>X.GC</code> to somethign better</li>
+<li>R’s <code>read.csv()</code> renamed some cols for us - spaces become periods, the %GC has been changed to X.</li>
+<li>Let’s change <code>X.GC</code> to something better</li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">colnames</span>(d)[<span class="dv">12</span>]</code></pre></div>
 <pre><code>&gt; # [1] &quot;X.GC&quot;</code></pre>
@@ -282,8 +293,8 @@ img {
 <span class="kw">colnames</span>(d)[<span class="dv">12</span>]</code></pre></div>
 <pre><code>&gt; # [1] &quot;percent.GC&quot;</code></pre>
 <ul>
-<li><p>We also could set row names using `row.names() &lt;- (row names must be unique).</p></li>
-<li><p>We can access a single column using the <code>$</code> operator.</p></li>
+<li>We also could set row names using `row.names() &lt;- (row names must be unique).</li>
+<li>We can access a single column using the <code>$</code> operator.</li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d$depth</code></pre></div>
 <pre><code>&gt; #  [1]  3.41  6.68  9.06 10.26  8.06  7.05  6.95  8.83  9.63  8.00  8.38
@@ -305,10 +316,10 @@ img {
 &gt; #   1.000   6.970   8.170   8.184   9.400  21.910</code></pre>
 <ul>
 <li><code>$</code> is a shortcut operator for the more general bracket operator used to access rows, columns, and cells.</li>
-<li>Remember when accessing elements of a vector we used vec[2]</li>
+<li>Remember when accessing elements of a vector we used vec[2] - maybe create one</li>
 <li>Since dataframes are 2-dimensional we used two indexes separated by comma</li>
 <li><p>df[row,col]</p></li>
-<li><p>We can return all rows and just columns we can omit the row index.</p></li>
+<li><p>We can return all rows of specified columns by omitting the row index.</p></li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d[, <span class="dv">1</span>:<span class="dv">2</span>]</code></pre></div>
 <pre><code>&gt; #          start      end
@@ -400,7 +411,7 @@ img {
 <pre><code>&gt; #   start   end
 &gt; # 1 55001 56000</code></pre>
 <ul>
-<li>when accessing a single column from a dataframe, R returns a vector.</li>
+<li>When accessing a single column from a dataframe, R returns a vector.</li>
 <li>Turn this behavior off by setting <code>drop</code> variable to FALSE</li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d[, <span class="st">&quot;start&quot;</span>, drop =<span class="st"> </span><span class="ot">FALSE</span>]</code></pre></div>
@@ -496,7 +507,11 @@ img {
 </ul>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sum</span>(d$cent)</code></pre></div>
 <pre><code>&gt; # [1] 685</code></pre>
-<p>Lastly, note that according to the supplementary material of this paper, the diversity estimates (columns Theta, Pi, and Heterozygosity) are all scaled up by 10x in the dataset (see supplementary Text S1 for more details). We’ll use the nucleotide diversity column Pi later in this chapter in plots, and it would be useful to have this scaled as per basepair nucleotide diversity (so as to make the scale more intuitive). We can create a new rescaled column called diversity with:</p>
+<ul>
+<li>Lastly, note that according to the supplementary material of this paper, the diversity estimates (columns Theta, Pi, and Heterozygosity) are all scaled up by 10x in the dataset (see supplementary Text S1 for more details).</li>
+<li>We’ll use the nucleotide diversity column Pi later in plots, and it would be useful to have this scaled as per basepair nucleotide diversity (so as to make the scale more intuitive).</li>
+<li>We can create a new rescaled column called diversity with:</li>
+</ul>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d$diversity &lt;-<span class="st"> </span>d$Pi/(<span class="dv">10</span> *<span class="st"> </span><span class="dv">1000</span>)  <span class="co"># rescale, removing 10x and making per bp</span>
 <span class="kw">summary</span>(d$diversity)</code></pre></div>
 <pre><code>&gt; #      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
@@ -579,7 +594,7 @@ img {
 &gt; # 58642 63189001 63190000 41.099  1.89</code></pre>
 <ul>
 <li>Subsetting columns can be good way to summarize data.</li>
-<li>Average depth in a window (depth col) differes between very high GC content windows (greater than 80%) and all other windows:</li>
+<li>Average depth in a window (depth col) differed between very high GC content windows (greater than 80%) and all other windows:</li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(d$depth[d$percent.GC &gt;=<span class="st"> </span><span class="dv">80</span>])</code></pre></div>
 <pre><code>&gt; #    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
