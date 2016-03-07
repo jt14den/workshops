@@ -110,7 +110,10 @@ img {
 <li>information about the sequencing depth (depth),</li>
 <li>and GC content (percent.GC).</li>
 </ul>
-<p>In this lesson, we’ll only work with a few columns in our examples; see the description of Dataset_S1.txt in this paper’s supplementary information for more detail. Dataset_S1.txt includes these estimates for 1kb windows in human chromosome 20. ## Loading Data into R</p>
+<p>In this lesson, we’ll only work with a few columns in our examples; see the description of Dataset_S1.txt in this paper’s supplementary information for more detail. Dataset_S1.txt includes these estimates for 1kb windows in human chromosome 20.</p>
+</div>
+<div id="loading-data-into-r" class="section level2">
+<h2>Loading Data into R</h2>
 <p>Before we download the data we need to find out our working directory and set it to the appropriate folder.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">getwd</span>()  <span class="co"># tells us our current working directory</span></code></pre></div>
 <pre><code>&gt; # [1] &quot;/Users/jtdennis/Desktop/workshops/intro-r&quot;</code></pre>
@@ -150,7 +153,13 @@ img {
 &gt; # 63689001,63690000,7,10363,10.36,6,1,1000,21.745,12.105,6.755,43.1431,0.000650676,0.01453488,0,0
 &gt; # 63690001,63691000,5,9885,9.89,1,1,1000,3.685,5.901,5.058,34.2342,0.000650676,0.01453488,0,0
 &gt; # 63691001,63692000,1,3309,6.29,1,0,526,3.022,3.022,3.022,35.6732,0.000650676,0.01453488,0,0</code></pre>
-<p>Looks good and tidy. We can now read the data into R.</p>
+<p>Looks good and tidy. We can now read the data into R. Tidy data is defined when:</p>
+<ul>
+<li>Each variable forms a column.</li>
+<li>Each observation forms a row.</li>
+<li>Each type of observational unit forms a table.</li>
+</ul>
+<p>Data often recorded by humans is in a <code>wide format</code>, think of a dataset with <code>years</code> across the columns and observations down the rows.</p>
 <p><strong>Note</strong>: If your data is untidy (not ready for analysis because of various reasons), you will need to reshape or clean your. Read Hadley Wickham’s article Tidy Data <a href="http://vita.had.co.nz/papers/tidy-data.pdf" class="uri">http://vita.had.co.nz/papers/tidy-data.pdf</a> for more information on how to do this in R.</p>
 <p><strong>Note:</strong> If your data is too big to read, try a few of the below strategies.</p>
 <ol style="list-style-type: decimal">
@@ -165,6 +174,9 @@ img {
 </ol>
 <p>If these don’t work try the packages <code>readr</code> or <code>data.table</code>, both improving read speed. Finally, if data still too big, you’ll want to keep the bulk of data out of memory use a database like <code>SQLite</code> (<code>RSQLite</code> package).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/Dataset_S1.txt&quot;</span>)</code></pre></div>
+<p>Look at the help information on <code>read.csv</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="st">`</span><span class="dt">?</span><span class="st">`</span>(read.csv)</code></pre></div>
+<p>Note that for <code>read.csv</code> header=TRUE is the default value, so R will create column names based on the first row head.</p>
 <p>In R, we can do this using the <code>head()</code> built in function. If you are familiar with <code>UNIX</code>, the <code>head()</code> function emulates the functionality that <code>head</code> provide on the command line, but against R objects. There is also a <code>tail</code> in R for inspecting the end lines of files. Let’s use <code>head()</code> and <code>tail()</code> to look in the file</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(d)</code></pre></div>
 <pre><code>&gt; #   start   end total.SNPs total.Bases depth unique.SNPs dhSNPs
@@ -183,12 +195,6 @@ img {
 &gt; # 3 0.007007007          0    0
 &gt; # 4 0.012012010          0    0
 &gt; #  [ reached getOption(&quot;max.print&quot;) -- omitted 2 rows ]</code></pre>
-<ul>
-<li>note that header is set to default true.</li>
-<li>note on wide to long example for genomics</li>
-<li>data often recorded by humans in wide format</li>
-<li><code>?read.csv</code> to see arguments</li>
-</ul>
 </div>
 <div id="data-frames" class="section level2">
 <h2>Data Frames</h2>
@@ -199,7 +205,7 @@ img {
 <li>Each vector represents a column, and each vector can be of a different data type (e.g., characters, integers, factors).</li>
 <li>The str() function is useful to inspect the data types of the columns.</li>
 </ul></li>
-<li><code>data.frame</code> created <code>read.csv()</code> or <code>read.table()</code></li>
+<li><code>data.frame</code> created by the <code>read.csv()</code> or <code>read.table()</code> functions. You can create a dataframe from scratch with the <code>data.frame()</code> function.</li>
 <li><code>data.frame</code> converts (= coerces) columns that contain characters (i.e., text) into the factor data type – we’ll return to this later</li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">str</span>(d)</code></pre></div>

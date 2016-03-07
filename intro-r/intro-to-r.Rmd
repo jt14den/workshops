@@ -38,6 +38,7 @@ Other columns contain:
 * and GC content (percent.GC). 
 
 In this lesson, we’ll only work with a few columns in our examples; see the description of Dataset_S1.txt in this paper’s supplementary information for more detail. Dataset_S1.txt includes these estimates for 1kb windows in human chromosome 20.
+
 ## Loading Data into R 
 
 Before we download the data we need to find out our working directory and set it to the appropriate folder. 
@@ -77,7 +78,13 @@ This prints out the first 10 lines of the file. Alternately, we can attempt to o
 tail -n 10 data/Dataset_S1.txt
 ```
 
-Looks good and tidy. We can now read the data into R. 
+Looks good and tidy. We can now read the data into R.  Tidy data is defined when:
+
+* Each variable forms a column.
+* Each observation forms a row.
+* Each type of observational unit forms a table.
+
+Data often recorded by humans is in a `wide format`, think of a dataset with `years` across the columns and observations down the rows. 
 
 **Note**: If your data is untidy (not ready for analysis because of various reasons), you will need to reshape or clean your. Read Hadley Wickham's article Tidy Data http://vita.had.co.nz/papers/tidy-data.pdf for more information on how to do this in R. 
 
@@ -97,16 +104,18 @@ Finally, if data still too big, you'll want to keep the bulk of data out of memo
 d <- read.csv("data/Dataset_S1.txt")
 ```
 
+Look at the help information on `read.csv`. 
+
+```{r eval=F}
+?read.csv
+```
+Note that for `read.csv` header=TRUE is the default value, so R will create column names based on the first row head header. 
+
 In R, we can do this using the `head()` built in function. If you are familiar with `UNIX`, the `head()` function emulates the functionality that `head` provide on the command line, but against R objects.  There is also a `tail` in R for inspecting the end lines of files. Let's use `head()` and `tail()` to look in the file
 
 ```{r}
 head(d)
 ```
-
-* note that header is set to default true.
-* note on wide to long example for genomics
-* data often recorded by humans in wide format
-* `?read.csv` to see arguments 
 
 ## Data Frames 
 
@@ -114,12 +123,13 @@ head(d)
 * A `data.frame` is a collection of vectors of identical lengths. 
     + Each vector represents a column, and each vector can be of a different data type (e.g., characters, integers, factors). 
     + The str() function is useful to inspect the data types of the columns.
-* `data.frame` created `read.csv()` or `read.table()`
+* `data.frame` created by the `read.csv()` or `read.table()` functions. You can create a dataframe from scratch with the `data.frame()` function. 
 * `data.frame` converts (= coerces) columns that contain characters (i.e., text) into the factor data type -- we'll return to this later
 
 ```{r}
 str(d)
 ```
+
 ## Inspecting data frames 
 
 `head()` and `str()` are helpful to to check contents of a data frame, but there are more functions that aid in telling what's in a data frame. 
